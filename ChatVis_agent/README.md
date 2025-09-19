@@ -1,8 +1,70 @@
 # ChatVis_agent
 
 ChatVis_agent is an LLM agent that aids the LLM to generate Python code for ParaView scientific visualization tasks.
-The agent currently uses GPT-4o as the underlying LLM, but one can easily modify the agent code to call a different LLM.
+The agent currently uses GPT-5mini as the underlying LLM, but one can easily modify the agent code to call a different LLM.
 ChatVis does not require retraining or fine-tuning the LLM.
 Instead, ChatVis employs chain-of-thought prompt simplification, retrieval-augmented prompt generation using a vector database of documentation and code examples, and error checking with iterative prompt feedback to correct errors until a visualization is produced.
+For now, the agent runs all the test cases included in the benchmark (`run_all.py`).
+Using `run_all.py` as an example, one could build an agent to run a single new case from a provided prompt.
 
-More details and instructions to come.
+## Setup
+
+It is recommended to install dependencies in a virtual Python environment or a Conda environment.
+
+Virtual Python environment (preferred):
+```
+python -m venv .venv
+source .venv/bin/activate
+pip3 install <dependencies>     # first time only
+cd /path/to/ChatVis_agent
+python3 <agent_script>
+```
+
+Conda environment:
+```
+conda activate
+pip3 install <dependencies>     # first time only
+cd /path/to/ChatVis_agent
+python3 <agent_script>
+conda deactivate
+```
+
+Install dependencies in your environment:
+```
+pip3 install faiss-cpu    # or faiss-gpu-cu<xx> where <xx> is the CUDA version, eg 11, 12 etc.
+pip3 install openai
+pip3 install ollama
+pip3 install sentence_transformers
+```
+
+If you have an Argonne National Laboratory username and are on site or accessing through the VPN, you can use the Argo proxy to access OpenAI through Argo. See the instructions in (https://github.com/Oaklight/argo-proxy) and do the following.
+In a new terminal window, open a virtual Python or Conda environment as described above, and then:
+```
+pip3 install argo-proxy
+argo-proxy
+
+# the first time, answer the following:
+
+No valid configuration found. Would you like to create it from config.sample.yaml? [Y/n]: y
+Use port [<...>]? [Y/n/<port>]: y
+Enter your username: <username>
+Enable verbose mode? [Y/n] y
+  
+```
+
+Export the following environment variables in the same terminal window where you will run the ChatVis agent:
+```
+export API_KEY=<your_key> # your OpenAI key or ANL username if using argo-proxy
+
+# if running argo-proxy:
+
+export OPENAI_BASE_URL=<url from argo-proxy execution:port>/v1 # don't forget to append "/v1"
+```
+
+Replace the path to your installation of `pvpython` in line 206 of `run_all.py`
+
+## Execution
+
+```
+python3 run_all.py
+```

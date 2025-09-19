@@ -15,7 +15,7 @@ cd /path/to/ChatVis_benchmark/evaluation
 python3 <evaluation_script>
 ```
 
-Conda environment (preferred):
+Conda environment:
 ```
 conda activate
 pip3 install <dependencies>     # first time only
@@ -30,7 +30,6 @@ pip3 install numpy
 pip3 install scikit-image
 pip3 install opencv-python
 pip3 install lpips
-pip3 install tabulate
 ```
 
 ## Execution
