@@ -22,8 +22,10 @@ import ollama
 # --- Local utilities ---
 from Utility.extract_utils import extract_python_code, extract_error_messages
 
-# path to pvpython, replace with the actual path returned by `which pvpython`
-path_to_pvpython = "/Applications/ParaView-5.13.2.app/Contents/Contents/bin:$PATH"  
+# path to pvpython
+PATH_TO_PVPYTHON = os.getenv("PATH_TO_PVPYTHON")
+path_to_pvpython = PATH_TO_PVPYTHON + ":$PATH"  
+print("path to pvpython", PATH_TO_PVPYTHON)
 os.environ["PATH"] += os.pathsep + path_to_pvpython
 
 # OpenAI key, set through environment variable
@@ -151,15 +153,14 @@ Avoid redundant operations and ensure compatibility with visualization libraries
 Primary Goal:
 Generate a precise, structured, and error-free script that accurately follows the user’s instructions, handling camera angles, views, rendering, and screenshots correctly. If any ambiguity exists, infer the most logical approach based on best practices. Follow Example Operations \n{operations_json}'''
 
-# execute the agent on all the test cases
+# -----  execute the agent on all the test cases -----
 
-# model_name =  'AI4S-paper-prompt'#'gpt-4.5-preview'
 python_file_name = '-full-prompt-2'
 
 cwd = Path.cwd()
-# eval_folder = str(cwd) + '/' + model_name + '/' #"/Users/oyildiz/Downloads/ChatVis/full-paper/eval/" + model_name + '/'
-eval_folder = str(cwd) + '/' + "results" + '/'
+eval_folder = os.getenv("GEN_VIS_DIR")
 os.makedirs(eval_folder, exist_ok=True)
+print("generated visualizations will be in", eval_folder, "\n")
 
 folder_path = str(cwd.parent) + '/ChatVis_benchmark/test_cases/'
 
@@ -178,17 +179,23 @@ for folder in subfolders:
 
 # iterate thru all tasks
 for folder in subfolder_paths:
-    print("folder", folder)
     task = os.path.basename(folder)
-    print("task", task)
+    print("task", task, "in folder", folder, "\n")
 
     prompt_file = folder + "/full_prompt.txt"
     with open(prompt_file, "r") as file:
         prompt = file.read()
         print(prompt)
 
+    unique_ops = process_prompt(prompt)
+    system_prompt_combined = {
+        "prompt": system_prompt,
+        "unique_ops": unique_ops
+    }   
+
     chat_completion = client.chat.completions.create(
         messages=[
+            # {"role": "system", "content": system_prompt_combined},
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
@@ -202,8 +209,7 @@ for folder in subfolder_paths:
     cfp = folder_path + task
     if file_path:
         
-        # replace the pvpython path accordingly
-        command = ["/Applications/ParaView-5.13.1.app/Contents/bin/pvpython", file_path] 
+        command = [PATH_TO_PVPYTHON + "/pvpython", file_path] 
 
         result = subprocess.run(command, capture_output=True, text=True, cwd=cfp)
         print("Error message is: ", result.stderr)

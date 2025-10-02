@@ -1,4 +1,5 @@
 import re
+import os
 
 def extract_python_code(text, name):
     """
@@ -8,11 +9,14 @@ def extract_python_code(text, name):
     # Regular expression to find all occurrences of Python code blocks
     code_blocks = re.findall(r"```python(.*?)```", text, re.DOTALL)
 
+    GEN_CODE_DIR = os.getenv("GEN_CODE_DIR")
+
     for i, block in enumerate(code_blocks, start=1):
         # Strip leading/trailing whitespace and maintain internal formatting
         formatted_block = block.strip()
         # Define file path for each code block
-        filename = "/Users/tanwimallick/Documents/Paraview/generated_code/{}_{}.py".format(name, i)
+        filename = GEN_CODE_DIR + "/{}_{}.py".format(name, i)
+        print("\ngenerated code filename", filename, "\n")
 
         with open(filename, 'w') as file:
             file.write(formatted_block)
