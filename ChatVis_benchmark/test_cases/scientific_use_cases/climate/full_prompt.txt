@@ -10,5 +10,5 @@ Add cone glyphs to show the direction of the velocity.
 The glyphs are composed of 10 polygons, having a radius 0 0.15, a height of 0.5, and a scaling factor of 0.5.
 View the result in the -z direction.
 Adjust the view so that the tubes occupy the 90% of the image.
-Save a screenshot of the result in the filename 'soma-screenshot.png'.
+Save a screenshot of the result in the filename 'climate-screenshot.png'.
 The rendered view and saved screenshot should be 2294 x 1440 pixels with a white background.

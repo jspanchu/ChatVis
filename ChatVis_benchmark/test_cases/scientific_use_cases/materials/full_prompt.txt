@@ -12,4 +12,4 @@ Label the left view "NN Prediction".
 Label the right view "Ground Truth".
 Orient the camera to look in the (-1, 0, -1) direction.
 Position the camera so that the dataset fits in the view.
-Save a screenshot of both views in the file "comparison-screenshot.png"
+Save a screenshot of both views in the file "materials-screenshot.png"

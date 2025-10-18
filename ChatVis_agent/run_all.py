@@ -11,13 +11,12 @@ import ast
 import pickle
 import subprocess
 from pathlib import Path
+import numpy as np
 
 # --- Third-party libraries ---
 import faiss
-import numpy as np
 from sentence_transformers import SentenceTransformer
 import openai
-import ollama
 
 # --- Local utilities ---
 from Utility.extract_utils import extract_python_code, extract_error_messages
@@ -64,6 +63,11 @@ faiss.write_index(index, "paraview_operations_faiss.index")
 with open("metadata_lookup.pkl", "wb") as f:
     pickle.dump(metadata_lookup, f)
 print("All ParaView operations stored in FAISS database.")
+
+# Load FAISS index (ensure it exists)
+index = faiss.read_index("paraview_operations_faiss.index")
+with open("metadata_lookup.pkl", "rb") as f:
+    metadata_lookup = pickle.load(f)
 
 # search similar operations
 def search_similar_operation(query_text, top_k=5):
@@ -155,7 +159,8 @@ Generate a precise, structured, and error-free script that accurately follows th
 
 # -----  execute the agent on all the test cases -----
 
-python_file_name = '-full-prompt-2'
+python_file_name = '-full-prompt'
+# python_file_name = '-quick-prompt'
 
 cwd = Path.cwd()
 eval_folder = os.getenv("GEN_VIS_DIR")
@@ -177,48 +182,52 @@ for folder in subfolders:
 
 # print("subfolder_paths", subfolder_paths)
 
+# set your LLM model here
+llm_model = "gpt4o"
+
 # iterate thru all tasks
 for folder in subfolder_paths:
     task = os.path.basename(folder)
-    print("task", task, "in folder", folder, "\n")
+    print("\ntask", task, "in folder", folder, "\n")
 
     prompt_file = folder + "/full_prompt.txt"
+    # prompt_file = folder + "/quick_prompt.txt"
     with open(prompt_file, "r") as file:
         prompt = file.read()
         print(prompt)
 
     unique_ops = process_prompt(prompt)
-    system_prompt_combined = {
-        "prompt": system_prompt,
-        "unique_ops": unique_ops
-    }   
+    prompt_new = prompt + 'Follow Example Operations \n{unique_ops}'
 
+    # call the LLM
     chat_completion = client.chat.completions.create(
         messages=[
-            # {"role": "system", "content": system_prompt_combined},
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt},
+            {"role": "user", "content": prompt_new},
         ],
-        # model= "gpt-4o" #"gpt-4-turbo" #gpt-4o",
-        model= "gpt5mini"
+        model = llm_model
     )
-
     script = chat_completion.choices[0].message.content  
+
+    # print("script:\n", script, "\n")
+    # print("task+python_file_name:", task+python_file_name)
     
     file_path = extract_python_code(script, task+python_file_name)
-    cfp = folder_path + task
+    cfp = folder
     if file_path:
         
         command = [PATH_TO_PVPYTHON + "/pvpython", file_path] 
 
         result = subprocess.run(command, capture_output=True, text=True, cwd=cfp)
-        print("Error message is: ", result.stderr)
+        errors = extract_error_messages(result.stderr)
         source_folder = cfp
         file_to_copy = task + "-screenshot.png"
-        subprocess.run(["mv", os.path.join(source_folder, file_to_copy), eval_folder])
 
-        errors = extract_error_messages(result.stderr)
-        print(errors)
+        if not errors:
+            subprocess.run(["mv", os.path.join(source_folder, file_to_copy), eval_folder])
+        else:
+            print("Error message is: ", result.stderr)
+            print(errors)
 
         attempts = 0
         while errors and attempts < 5:
@@ -238,17 +247,13 @@ for folder in subfolder_paths:
             Please make sure the new script runs correctly without errors.
             """
 
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ]
-            
-            messages.append({"role": "user", "content": followup_question})
-
-            # Call the API again with full message history
+            # call the LLM again
             response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=messages,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": followup_question},
+                ],
+                model=llm_model
             )
             
             # Assuming the AI provides new Python code in the response
@@ -256,7 +261,6 @@ for folder in subfolder_paths:
             file_path = extract_python_code(script, task+python_file_name)
             
             # Execute the new script with pvpython
-            command = ["/Applications/ParaView-5.13.2.app/Contents/bin/pvpython", file_path]
             result = subprocess.run(command, capture_output=True, text=True, cwd=cfp)
 
             # Extract errors from stderr, if any
@@ -272,7 +276,3 @@ for folder in subfolder_paths:
                 break
             else:
                 print("Errors detected. Trying again...")
-
-        subprocess.run(["mv", file_path, eval_folder])
-
-

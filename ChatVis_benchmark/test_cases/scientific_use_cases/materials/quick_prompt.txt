@@ -6,4 +6,4 @@ In both views, take an isovolume of the "Intensity" variable in the range of [0.
 Color both views with the Viridis (matplotlib) color map for the "Phase" variable, scaled to the data range, including a colormap legend in both views.
 Label the left view "NN Prediction" and the right view "Ground Truth".
 Orient the camera to look in the (-1, 0, -1) direction, with the datasets fitting in the views.
-Save a screenshot of both views in "comparison-screenshot.png"
+Save a screenshot of both views in "materials-screenshot.png"

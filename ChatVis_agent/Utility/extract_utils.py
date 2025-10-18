@@ -16,11 +16,11 @@ def extract_python_code(text, name):
         formatted_block = block.strip()
         # Define file path for each code block
         filename = GEN_CODE_DIR + "/{}_{}.py".format(name, i)
-        print("\ngenerated code filename", filename, "\n")
+        print("generated code filename", filename, "\n")
 
         with open(filename, 'w') as file:
             file.write(formatted_block)
-        print(f"Code Block {i} saved to {filename}")
+        print(f"Code Block {i} saved to {filename}\n")
         return filename
 
 def extract_error_messages(stderr_output):

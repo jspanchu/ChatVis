@@ -33,7 +33,6 @@ Install dependencies in your environment:
 ```
 pip3 install faiss-cpu    # or faiss-gpu-cu<xx> where <xx> is the CUDA version, eg 11, 12 etc.
 pip3 install openai
-pip3 install ollama
 pip3 install sentence_transformers
 ```
 
@@ -56,13 +55,13 @@ Export the following environment variables in the same terminal window where you
 ```
 export GEN_CODE_DIR=<existing directory where generated Python code will be placed (absolute full path)>
 export GEN_VIS_DIR=<existing directory where generated visualizations will be placed (absolute full path)>
-export PATH_TO_PVPYTHON=<path to bin directory where pvpython can be found (absolute full path)>
+export PATH_TO_PVPYTHON=<path to bin directory where pvpython can be found (absolute full path, excluding pvpython executable, eg. /Applications/ParaView-5.13.1.app/Contents/bin)>
 export TOKENIZERS_PARALLELISM=true
 export API_KEY=<your OpenAI key or ANL username if using argo-proxy>
 
 # if running argo-proxy:
 
-export OPENAI_BASE_URL=<url from argo-proxy execution:port>/v1 # don't forget to append "/v1"
+export OPENAI_BASE_URL=<url from argo-proxy execution:port>/v1 # don't forget to append "/v1", eg http://0.0.0.0:54901/v1
 ```
 
 ## Execution
