@@ -1,4 +1,4 @@
-# ChatVis agent to run all test cases in the ChatVis benchmark
+# ChatVis agent to run a single test case in the ChatVis benchmark
 
 # Import required modules
 
@@ -140,7 +140,7 @@ Unless the user specifically instructs you to not show a data source, please sho
 Apply background settings before rendering.
 If a white background is needed for screenshots, ensure it is set before rendering.
 Save screenshots immediately after rendering, before moving to the next step.
-Ensure filenames or saving locations match the user’s intent.
+Ensure filenames or saving locations match the user's intent.
 
 Camera and Viewing Directions
 If a specific camera direction or position is given by the user adjust the camera accordingly.
@@ -155,49 +155,55 @@ Ensure modular, readable, and structured code.
 Add comments to explain significant steps.
 Avoid redundant operations and ensure compatibility with visualization libraries.
 Primary Goal:
-Generate a precise, structured, and error-free script that accurately follows the user’s instructions, handling camera angles, views, rendering, and screenshots correctly. If any ambiguity exists, infer the most logical approach based on best practices. Follow Example Operations \n{operations_json}'''
+Generate a precise, structured, and error-free script that accurately follows the user's instructions, handling camera angles, views, rendering, and screenshots correctly. If any ambiguity exists, infer the most logical approach based on best practices. Follow Example Operations \n{operations_json}'''
 
-# -----  Execute the agent on all the test cases -----
+# -----  Execute the agent on a single test case -----
 
-python_file_name = '-full-prompt'
-# python_file_name = '-quick-prompt'
+def run_single_test_case(test_case_path):
+    """
+    Execute a single test case from the given path.
 
-cwd = Path.cwd()
-eval_folder = os.getenv("GEN_VIS_DIR")
-os.makedirs(eval_folder, exist_ok=True)
-print("generated visualizations will be in", eval_folder, "\n")
+    Args:
+        test_case_path (str): Path to the test case directory
+    """
 
-folder_path = str(cwd.parent) + '/ChatVis_benchmark/test_cases/'
+    python_file_name = '-full-prompt'
+    # python_file_name = '-quick-prompt'
 
-subfolders = [name for name in os.listdir(folder_path) 
-              if os.path.isdir(os.path.join(folder_path, name))]
+    cwd = Path.cwd()
+    eval_folder = os.getenv("GEN_VIS_DIR")
+    os.makedirs(eval_folder, exist_ok=True)
+    print("generated visualizations will be in", eval_folder, "\n")
 
-subfolder_paths = []
-for folder in subfolders:
-    subfolder_path = os.path.join(folder_path, folder)
-    subfolder_paths.extend(
-        os.path.join(subfolder_path, name) for name in os.listdir(subfolder_path) 
-        if os.path.isdir(os.path.join(subfolder_path, name))
-    )
+    # Validate the test case path
+    if not os.path.exists(test_case_path):
+        print(f"Error: Test case path does not exist: {test_case_path}")
+        return
 
-# print("subfolder_paths", subfolder_paths)
+    if not os.path.isdir(test_case_path):
+        print(f"Error: Path is not a directory: {test_case_path}")
+        return
 
-# Set your LLM model here
-llm_model = "gpt4o"
+    task = os.path.basename(test_case_path)
+    print("\ntask", task, "in folder", test_case_path, "\n")
 
-# Iterate thru all tasks
-for folder in subfolder_paths:
-    task = os.path.basename(folder)
-    print("\ntask", task, "in folder", folder, "\n")
+    # Check if prompt file exists
+    prompt_file = os.path.join(test_case_path, "full_prompt.txt")
+    # prompt_file = os.path.join(test_case_path, "quick_prompt.txt")
 
-    prompt_file = folder + "/full_prompt.txt"
-    # prompt_file = folder + "/quick_prompt.txt"
+    if not os.path.exists(prompt_file):
+        print(f"Error: Prompt file not found: {prompt_file}")
+        return
+
     with open(prompt_file, "r") as file:
         prompt = file.read()
         print(prompt)
 
     unique_ops = process_prompt(prompt)
     prompt_new = prompt + 'Follow Example Operations \n{unique_ops}'
+
+    # Set your LLM model here
+    llm_model = "gpt4o"
 
     # Call the LLM
     chat_completion = client.chat.completions.create(
@@ -207,16 +213,16 @@ for folder in subfolder_paths:
         ],
         model = llm_model
     )
-    script = chat_completion.choices[0].message.content
+    script = chat_completion.choices[0].message.content  
 
     # print("script:\n", script, "\n")
     # print("task+python_file_name:", task+python_file_name)
 
     file_path = extract_python_code(script, task+python_file_name)
-    cfp = folder
+    cfp = test_case_path
     if file_path:
 
-        command = [PATH_TO_PVPYTHON + "/pvpython", file_path] 
+        command = [PATH_TO_PVPYTHON + "/pvpython", file_path]
 
         result = subprocess.run(command, capture_output=True, text=True, cwd=cfp)
         errors = extract_error_messages(result.stderr)
@@ -276,3 +282,13 @@ for folder in subfolder_paths:
                 break
             else:
                 print("Errors detected. Trying again...")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python run_one.py <test_case_path>")
+        print("Example: python run_one.py /path/to/ChatVis_benchmark/test_cases/task1/test_case_1")
+        sys.exit(1)
+
+    test_case_path = sys.argv[1]
+    run_single_test_case(test_case_path)

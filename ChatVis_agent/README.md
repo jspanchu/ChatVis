@@ -48,7 +48,7 @@ No valid configuration found. Would you like to create it from config.sample.yam
 Use port [<...>]? [Y/n/<port>]: y
 Enter your username: <username>
 Enable verbose mode? [Y/n] y
-  
+
 ```
 
 Export the following environment variables in the same terminal window where you will run the ChatVis agent:
@@ -66,7 +66,14 @@ export OPENAI_BASE_URL=<url from argo-proxy execution:port>/v1 # don't forget to
 
 ## Execution
 
+Run all test cases
 ```
 cd /path/to/ChatVis/ChatVis_agent    # need to be in this directory
 python3 ./run_all.py
+```
+
+Run one test case
+```
+cd /path/to/ChatVis/ChatVis_agent           # need to be in this directory
+python3 ./run_one.py <path to test case>    # eg /path/to/ChatVis/ChatVis_benchmark/test_cases/canonical_visualizations/ml-iso
 ```
