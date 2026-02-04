@@ -57,7 +57,7 @@ export GEN_CODE_DIR=<existing directory where generated Python code will be plac
 export GEN_VIS_DIR=<existing directory where generated visualizations will be placed (absolute full path)>
 export PATH_TO_PVPYTHON=<path to bin directory where pvpython can be found (absolute full path, excluding pvpython executable, eg. /Applications/ParaView-5.13.1.app/Contents/bin)>
 export TOKENIZERS_PARALLELISM=true
-export API_KEY=<your OpenAI key or ANL username if using argo-proxy>
+export OPENAI_API_KEY=<your OpenAI key or ANL username if using argo-proxy>
 
 # if running argo-proxy:
 

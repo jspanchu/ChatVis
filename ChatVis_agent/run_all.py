@@ -28,9 +28,9 @@ print("path to pvpython", PATH_TO_PVPYTHON)
 os.environ["PATH"] += os.pathsep + path_to_pvpython
 
 # OpenAI key, set through environment variable
-API_KEY = os.getenv("API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI(
-    api_key=API_KEY,
+    api_key = OPENAI_API_KEY,
 )
 
 # Read and parse the JSON file
