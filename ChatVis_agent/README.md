@@ -77,3 +77,7 @@ Run one test case
 cd /path/to/ChatVis/ChatVis_agent           # need to be in this directory
 python3 ./run_one.py <path to test case>    # eg /path/to/ChatVis/ChatVis_benchmark/test_cases/canonical_visualizations/ml-iso
 ```
+
+## Using AGENTS.md with ChatVis_agent
+
+In addition to running predefined benchmark cases, ChatVis_agent can be used interactively via a generic AGENTS.md file (e.g., through a framework such as OpenCode). The AGENTS.md file defines the agent’s behavior and does not require project-specific configuration. To do so, launch OpenCode from within the ChatVis_agent/ directory so it detects AGENTS.md, and provide a prompt that clearly specifies the input data paths, desired output locations, the pvpython path and any runtime arguments, as well as a concise description of the visualization task (e.g., variables to render, filters to apply, timesteps, camera settings, and expected outputs such as screenshots or animations).
