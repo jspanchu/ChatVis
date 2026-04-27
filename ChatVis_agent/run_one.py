@@ -33,6 +33,9 @@ client = openai.OpenAI(
     api_key = OPENAI_API_KEY,
 )
 
+# LLM model
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
+
 # Read and parse the JSON file
 json_file_path = "operations.json"
 with open(json_file_path, "r") as file:
@@ -203,7 +206,7 @@ def run_single_test_case(test_case_path):
     prompt_new = prompt + 'Follow Example Operations \n{unique_ops}'
 
     # Set your LLM model here
-    llm_model = "gpt4o"
+    llm_model = LLM_MODEL
 
     # Call the LLM
     chat_completion = client.chat.completions.create(

@@ -33,6 +33,9 @@ client = openai.OpenAI(
     api_key = OPENAI_API_KEY,
 )
 
+# LLM model
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
+
 # Read and parse the JSON file
 json_file_path = "operations.json"
 with open(json_file_path, "r") as file:
@@ -183,7 +186,7 @@ for folder in subfolders:
 # print("subfolder_paths", subfolder_paths)
 
 # Set your LLM model here
-llm_model = "gpt4o"
+llm_model = LLM_MODEL
 
 # Iterate thru all tasks
 for folder in subfolder_paths:
